@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////
 ///  @file     id33_binary_search_rotate.cpp
 ///  @brief    binary search -- leetcode 33: Search in Rotated Sorted Array
@@ -79,7 +80,8 @@ int Search(const int* nums, const int numsSize, const int target)
         mid = low + ((high - low) >> 1);
         if (nums[mid] < target)
         {
-            if (nums[mid] < nums[low] && target > nums[numsSize-1]) // right sub array
+            if (nums[mid] < nums[low]   // right sub array
+                    && target > nums[high])
             {
                 high = mid -1;
             }
@@ -90,7 +92,8 @@ int Search(const int* nums, const int numsSize, const int target)
         }
         else if (nums[mid] > target)
         {
-            if (nums[mid] > nums[numsSize-1] && nums[numsSize-1] >= target) // left sub array
+            if (nums[mid] > nums[high]   // left sub array
+                    && nums[high] >= target)
             {
                 low = mid + 1;
             }
@@ -108,20 +111,24 @@ int Search(const int* nums, const int numsSize, const int target)
 }
 
 /*
- test result
+test result
 
-iterator number:            10      20      30      50      80      100     150     200     300     400     500     800     1000	2000	3000	4000	5000	10000
-c search use time(ms):		0.00	0.02	0.04	0.14	0.36	0.56	1.42	2.81	6.82	12.64	19.82	54.46	86.34	352.99	797.56	1403.84	2242.37	9372.29
-cpp search use time(ms):	0.01	0.09	0.16	0.36	0.90	1.81	4.02	8.28	18.54	38.10	69.70	154.47	288.08	831.37	2047.58	4227.48	7722.19	28637.23
-c per use time(ms):         0.00	0.00	0.00	0.00	0.00	0.01	0.01	0.01	0.02	0.03	0.04	0.07	0.09	0.18	0.27	0.35	0.45	0.94
-cpp per use time(ms):		0.00	0.00	0.01	0.01	0.01	0.02	0.03	0.04	0.06	0.10	0.14	0.19	0.29	0.42	0.68	1.06	1.54	2.86
-speed ratio:                2.50	5.41	3.85	2.61	2.50	3.25	2.83	2.94	2.72	3.01	3.52	2.84	3.34	2.36	2.57	3.01	3.44	3.06
+edition 3:
+iterator number:            10	20	30	50	80	100	150	200	300	400	500	800	1000	2000	3000	4000	5000	10000
+c search use time(ms):		0.01	0.01	0.03	0.09	0.22	0.35	0.94	1.73	4.21	7.31	10.20	28.62	44.74	188.09	436.61	749.64	1182.73	4870.06
+cpp search use time(ms):	0.01	0.02	0.03	0.09	0.26	0.38	0.98	1.70	4.22	7.71	10.71	29.73	48.49	196.77	451.04	777.41	1217.87	4969.70
+c per use time(ms):         0.00	0.00	0.00	0.00	0.00	0.00	0.01	0.01	0.01	0.02	0.02	0.04	0.04	0.09	0.15	0.19	0.24	0.49
+cpp per use time(ms):		0.00	0.00	0.00	0.00	0.00	0.00	0.01	0.01	0.01	0.02	0.02	0.04	0.05	0.10	0.15	0.19	0.24	0.50
+speed ratio:                1.00	1.73	0.74	0.98	1.16	1.07	1.03	0.99	1.00	1.05	1.05	1.04	1.08	1.05	1.03	1.04	1.03	1.02
+conclusion:
+1. c,c++ 速度无差别;
+2. edition 2 结果是对的，但是逻辑不严谨，并由此带来了部分速度上的损失（为啥，按说不至于啊）；
 */
 
 void TestTimeC()
 {
 
-    const int LENGTH[] = {10, 20, 30, 50, 80, 100, 150, 200, 300, 400, 500, 800, 1000, 2000};//, 3000, 4000, 5000, 10000};
+    const int LENGTH[] = {10, 20, 30, 50, 80, 100, 150, 200, 300, 400, 500, 800, 1000, 2000, 3000, 4000, 5000, 10000};
 
     const int size = sizeof(LENGTH) / sizeof(int);
 
@@ -174,7 +181,7 @@ void TestTimeC()
         timeCList.push_back(timeC);
         timeCppList.push_back(timeCpp);
         timeC = 0;
-        timeC = 0;
+        timeCpp = 0;
     }
 
     printf("\nc search use time(ms):\t\t");
@@ -246,8 +253,8 @@ void Design()
 
 int main(int argc, char *argv[])
 {
-    Design();
-    printf("\n");
+//    Design();
+//    printf("\n");
     TestTimeC();
     printf("\n");
 }
@@ -441,4 +448,43 @@ int Search(const int* nums, const int numsSize, const int target)
     }
     return -1;
 }
+//------------edition 3:判断哨兵反向移动的条件更严谨
+int Search(const int* nums, const int numsSize, const int target)
+{
+    int low = 0, high = numsSize-1, mid = -1;
+    while(low <= high)
+    {
+        mid = low + ((high - low) >> 1);
+        if (nums[mid] < target)
+        {
+            if (nums[mid] < nums[low]   // right sub array
+                    && target > nums[high])
+            {
+                high = mid -1;
+            }
+            else
+            {
+                low = mid + 1;
+            }
+        }
+        else if (nums[mid] > target)
+        {
+            if (nums[mid] > nums[high]   // left sub array
+                    && nums[high] >= target)
+            {
+                low = mid + 1;
+            }
+            else
+            {
+                high = mid -1;
+            }
+        }
+        else
+        {
+            return mid;
+        }
+    }
+    return -1;
+}
  * */
+
